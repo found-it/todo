@@ -5,7 +5,6 @@ import (
     "fmt"
     "os"
     "flag"
-    "reflect"
 )
 
 
@@ -33,20 +32,21 @@ The commands are:
 /*
 
 Commands:
-    list
-    add
-    rm
-    done
-    tag
+    list <tag>
+    add "task" <tag>
+    rm <tag>
+    done "task"
+    tag "task" <tag>
 
 */
 func parse_args() (string, []string) {
 
-    list_cmd := flag.NewFlagSet("list", flag.ExitOnError)
-    add_cmd  := flag.NewFlagSet("add",  flag.ExitOnError)
-    rm_cmd   := flag.NewFlagSet("rm",   flag.ExitOnError)
-    done_cmd := flag.NewFlagSet("done", flag.ExitOnError)
-    tag_cmd  := flag.NewFlagSet("tag",  flag.ExitOnError)
+    list_cmd  := flag.NewFlagSet("list",  flag.ExitOnError)
+    add_cmd   := flag.NewFlagSet("add",   flag.ExitOnError)
+    rm_cmd    := flag.NewFlagSet("rm",    flag.ExitOnError)
+    done_cmd  := flag.NewFlagSet("done",  flag.ExitOnError)
+    tag_cmd   := flag.NewFlagSet("tag",   flag.ExitOnError)
+    clean_cmd := flag.NewFlagSet("clean", flag.ExitOnError)
 
 
     if len(os.Args) < 2 {
@@ -55,47 +55,53 @@ func parse_args() (string, []string) {
         os.Exit(1)
     }
 
+    var cmd string = "none"
+    arg := []string{}
+
     switch os.Args[1] {
 
     case "list":
-        fmt.Println("list")
+        cmd = "list"
         list_cmd.Parse(os.Args[2:])
-        fmt.Println(reflect.TypeOf(list_cmd.Args()))
-        return "list", list_cmd.Args()
+        arg = list_cmd.Args()
     case "add":
-        fmt.Println("add")
+        cmd = "add"
         add_cmd.Parse(os.Args[2:])
-        fmt.Println(add_cmd.Args())
+        arg = add_cmd.Args()
     case "rm":
-        fmt.Println("rm")
+        cmd = "rm"
         rm_cmd.Parse(os.Args[2:])
-        fmt.Println(rm_cmd.Args())
+        arg = rm_cmd.Args()
     case "done":
-        fmt.Println("done")
+        cmd = "done"
         done_cmd.Parse(os.Args[2:])
-        fmt.Println(done_cmd.Args())
+        arg = done_cmd.Args()
     case "tag":
-        fmt.Println("tag")
+        cmd = "tag"
         tag_cmd.Parse(os.Args[2:])
-        fmt.Println(tag_cmd.Args())
+        arg = tag_cmd.Args()
+    case "clean":
+        cmd = "clean"
+        clean_cmd.Parse(os.Args[2:])
+        arg = clean_cmd.Args()
     default:
-        fmt.Println("Expected different subcommand")
+        fmt.Println("Expected different subcommand than [", os.Args[1], "]")
         // print usage
         usage()
         os.Exit(1)
     }
-    return "none", []string{}
+    return cmd, arg
 }
 
 // This is the main function
 func main() {
 
 
-    cmd, arr := parse_args()
+    cmd, arg := parse_args()
 
 
     fmt.Println("cmd: ", cmd)
-    fmt.Println("arr: ", arr)
+    fmt.Println("arg: ", arg)
 
 
 
