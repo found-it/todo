@@ -4,105 +4,59 @@ package main
 import (
     "fmt"
     "os"
-    "flag"
+    "io/ioutil"
+    "strings"
+    "github.com/fatih/color"
 )
 
+import (
+    "usage"
+    "argparse"
+)
 
-func usage() {
-    var usg string = `
+type TodoLine struct {
 
-Usage:
+    Id      int
+    Status  string
+    Task    string
+    Tags    string
 
-    todo <command> [arguments]
-
-The commands are:
-
-    list        list tasks
-    add         add a task
-    rm          remove a task
-    done        mark a task as done
-    tag         tag a task
-    clean       clean out finished tasks
-
-    `
-    fmt.Println(usg)
 }
 
 
-/*
-
-Commands:
-    list <tag>
-    add "task" <tag>
-    rm <tag>
-    done "task"
-    tag "task" <tag>
-
-*/
-func parse_args() (string, []string) {
-
-    list_cmd  := flag.NewFlagSet("list",  flag.ExitOnError)
-    add_cmd   := flag.NewFlagSet("add",   flag.ExitOnError)
-    rm_cmd    := flag.NewFlagSet("rm",    flag.ExitOnError)
-    done_cmd  := flag.NewFlagSet("done",  flag.ExitOnError)
-    tag_cmd   := flag.NewFlagSet("tag",   flag.ExitOnError)
-    clean_cmd := flag.NewFlagSet("clean", flag.ExitOnError)
-
-
-    if len(os.Args) < 2 {
-        // print usage
-        usage()
-        os.Exit(1)
-    }
-
-    var cmd string = "none"
-    arg := []string{}
-
-    switch os.Args[1] {
-
-    case "list":
-        cmd = "list"
-        list_cmd.Parse(os.Args[2:])
-        arg = list_cmd.Args()
-    case "add":
-        cmd = "add"
-        add_cmd.Parse(os.Args[2:])
-        arg = add_cmd.Args()
-    case "rm":
-        cmd = "rm"
-        rm_cmd.Parse(os.Args[2:])
-        arg = rm_cmd.Args()
-    case "done":
-        cmd = "done"
-        done_cmd.Parse(os.Args[2:])
-        arg = done_cmd.Args()
-    case "tag":
-        cmd = "tag"
-        tag_cmd.Parse(os.Args[2:])
-        arg = tag_cmd.Args()
-    case "clean":
-        cmd = "clean"
-        clean_cmd.Parse(os.Args[2:])
-        arg = clean_cmd.Args()
-    default:
-        fmt.Println("Expected different subcommand than [", os.Args[1], "]")
-        // print usage
-        usage()
-        os.Exit(1)
-    }
-    return cmd, arg
-}
+// func printTodoLine(line TodoLine
 
 // This is the main function
 func main() {
 
+    yellow := color.New(color.FgYellow).SprintFunc()
+    cyan   := color.New(color.FgCyan).SprintFunc()
 
-    cmd, arg := parse_args()
+    cmd, arg := argparse.Parse()
+
+    switch cmd {
+
+    case "list":
+        content, err := ioutil.ReadFile(".todo.txt")
+        if err != nil {
+            panic(err)
+        }
+        ll := strings.Split(string(content), ":")
+        fmt.Printf("%s: %s\n", yellow(ll[0]), cyan(ll[1]))
 
 
-    fmt.Println("cmd: ", cmd)
-    fmt.Println("arg: ", arg)
+    case "add":
+        line := "TODO: " + arg[0] + "\n"
+        err := ioutil.WriteFile(".todo.txt", []byte(line), 0644)
+        if err != nil {
+            panic(err)
+        }
 
-
+    default:
+        fmt.Println("Expected different subcommand than [", os.Args[1], "]")
+        // print usage
+        usage.All()
+        os.Exit(1)
+    }
 
 }
