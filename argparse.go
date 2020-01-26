@@ -1,5 +1,5 @@
 
-package argparse
+package main
 
 import (
     "flag"
@@ -7,9 +7,6 @@ import (
     "fmt"
 )
 
-import (
-    "usage"
-)
 /*
  *  Ensure that all the command line arguments are formatted in the expected
  *  format. Error out with explanation if the arguments do not match.
@@ -29,22 +26,18 @@ func Parse() (string, []string) {
     listCmd  := flag.NewFlagSet("list",  flag.ExitOnError)
 
     addCmd   := flag.NewFlagSet("add",   flag.ExitOnError)
-    addCmdTag := addCmd.String("tag", "", "tag")
+    // addCmdTag := addCmd.String("tag", "", "tag")
 
     rmCmd    := flag.NewFlagSet("rm",    flag.ExitOnError)
 
     doneCmd  := flag.NewFlagSet("done",  flag.ExitOnError)
-
-    tagCmd   := flag.NewFlagSet("tag",   flag.ExitOnError)
-
-    cleanCmd := flag.NewFlagSet("clean", flag.ExitOnError)
 
 
     argCount := len(os.Args[1:])
 
     if argCount < 1 {
         // print usage
-        usage.All()
+        All()
         os.Exit(1)
     }
 
@@ -60,21 +53,15 @@ func Parse() (string, []string) {
 
     case "add":
         if argCount < 2 {
-            usage.Add()
+            Add()
             os.Exit(1)
         }
         cmd = "add"
         addCmd.Parse(os.Args[2:])
-        fmt.Println("subcommand 'add'")
-        fmt.Println("  tag:", *addCmdTag)
-        arg = addCmd.Args()
-        for _,v := range arg {
-            fmt.Println(v)
-        }
 
     case "rm":
         if argCount < 2 {
-            usage.Rm()
+            Rm()
             os.Exit(1)
         }
         cmd = "rm"
@@ -83,35 +70,17 @@ func Parse() (string, []string) {
 
     case "done":
         if argCount < 2 {
-            usage.Done()
+            Done()
             os.Exit(1)
         }
         cmd = "done"
         doneCmd.Parse(os.Args[2:])
         arg = doneCmd.Args()
 
-    case "tag":
-        if argCount < 2 {
-            usage.Tag()
-            os.Exit(1)
-        }
-        cmd = "tag"
-        tagCmd.Parse(os.Args[2:])
-        arg = tagCmd.Args()
-
-    case "clean":
-        if argCount < 2 {
-            usage.Clean()
-            os.Exit(1)
-        }
-        cmd = "clean"
-        cleanCmd.Parse(os.Args[2:])
-        arg = cleanCmd.Args()
-
     default:
         fmt.Println("Expected different subcommand than [", os.Args[1], "]")
         // print usage
-        usage.All()
+        All()
         os.Exit(1)
     }
     return cmd, arg

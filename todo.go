@@ -1,18 +1,16 @@
-
+//
 package main
 
 import (
     "fmt"
     "os"
-    "io/ioutil"
+    "bufio"
     "strings"
+    // "io/ioutil"
     "github.com/fatih/color"
+    "log"
 )
 
-import (
-    "usage"
-    "argparse"
-)
 
 type TodoLine struct {
 
@@ -29,33 +27,55 @@ type TodoLine struct {
 // This is the main function
 func main() {
 
+    const filename string = ".todo.txt"
+
     yellow := color.New(color.FgYellow).SprintFunc()
     cyan   := color.New(color.FgCyan).SprintFunc()
 
-    cmd, arg := argparse.Parse()
+    cmd, arg := Parse()
+
+    file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer file.Close()
 
     switch cmd {
 
     case "list":
-        content, err := ioutil.ReadFile(".todo.txt")
-        if err != nil {
-            panic(err)
+        scanner := bufio.NewScanner(file)
+        success := true
+        for success {
+            success = scanner.Scan()
+            if success == false {
+                if scanner.Err() != nil {
+                    log.Fatal(scanner.Err())
+                } else {
+                    break
+                }
+            }
+
+            ll := strings.Split(scanner.Text(), ":")
+            fmt.Printf("%s: %s\n", yellow(ll[0]), cyan(ll[1]))
         }
-        ll := strings.Split(string(content), ":")
-        fmt.Printf("%s: %s\n", yellow(ll[0]), cyan(ll[1]))
 
 
     case "add":
-        line := "TODO: " + arg[0] + "\n"
-        err := ioutil.WriteFile(".todo.txt", []byte(line), 0644)
+        line := "TODO:" + arg[0] + "\n"
+        _, err := file.WriteString(line)
         if err != nil {
             panic(err)
         }
+
+    // case "done":
+    //     txt, err := ioutil.ReadFile(
+
 
     default:
         fmt.Println("Expected different subcommand than [", os.Args[1], "]")
         // print usage
-        usage.All()
+        All()
         os.Exit(1)
     }
 
