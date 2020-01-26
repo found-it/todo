@@ -62,6 +62,7 @@ func main() {
 
 
     case "add":
+        fmt.Println("Adding:", arg[0])
         line := "TODO:" + arg[0] + "\n"
         _, err := file.WriteString(line)
         if err != nil {
@@ -69,7 +70,7 @@ func main() {
         }
 
     // case "done":
-    //     txt, err := ioutil.ReadFile(
+        // txt, err := ioutil.ReadFile(file)
 
 
     default:

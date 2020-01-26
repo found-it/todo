@@ -58,6 +58,7 @@ func Parse() (string, []string) {
         }
         cmd = "add"
         addCmd.Parse(os.Args[2:])
+        arg = addCmd.Args()
 
     case "rm":
         if argCount < 2 {
