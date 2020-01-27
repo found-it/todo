@@ -20,6 +20,8 @@ import (
  *      tag "task" <tag>
  *      clean <tag>
  *
+ *  TODO: Figure out why go install does not pick up changes in this file??????
+ *
  */
 func Parse() (string, []string) {
 

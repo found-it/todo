@@ -6,7 +6,7 @@ import (
     "os"
     "bufio"
     "strings"
-    // "io/ioutil"
+    "io/ioutil"
     "github.com/fatih/color"
     "log"
 )
@@ -29,8 +29,8 @@ func main() {
 
     const filename string = ".todo.txt"
 
-    yellow := color.New(color.FgYellow).SprintFunc()
-    cyan   := color.New(color.FgCyan).SprintFunc()
+    yellow := color.New(color.FgYellow, color.Bold).SprintFunc()
+    blue   := color.New(color.FgBlue).SprintFunc()
 
     cmd, arg := Parse()
 
@@ -43,41 +43,80 @@ func main() {
 
     switch cmd {
 
-    case "list":
-        scanner := bufio.NewScanner(file)
-        success := true
-        for success {
-            success = scanner.Scan()
-            if success == false {
-                if scanner.Err() != nil {
-                    log.Fatal(scanner.Err())
+        case "list":
+            fmt.Println("\n")
+            scanner := bufio.NewScanner(file)
+            var dones strings.Builder
+            success := true
+            for success {
+                success = scanner.Scan()
+                if success == false {
+                    if scanner.Err() != nil {
+                        log.Fatal(scanner.Err())
+                    } else {
+                        break
+                    }
+                }
+
+                ll := strings.Split(scanner.Text(), ":")
+                if ll[0] == "DONE" {
+                    dones.WriteString(scanner.Text() + "\n")
                 } else {
-                    break
+                    fmt.Printf("%s: %s\n", yellow(ll[0]), blue(ll[1]))
                 }
             }
+            if len(dones.String()) > 0 {
+                fmt.Println("\n")
+                fmt.Printf("%s", yellow("Finished Tasks:"))
+                fmt.Println("\n")
+                ll := strings.Split(dones.String(), "\n")
+                for _, done := range ll {
+                    if len(done) > 0 {
+                        dd := strings.Split(done, ":")
+                        fmt.Printf("%s: %s\n", yellow(dd[0]), blue(dd[1]))
+                    }
+                }
 
-            ll := strings.Split(scanner.Text(), ":")
-            fmt.Printf("%s: %s\n", yellow(ll[0]), cyan(ll[1]))
-        }
-
-
-    case "add":
-        fmt.Println("Adding:", arg[0])
-        line := "TODO:" + arg[0] + "\n"
-        _, err := file.WriteString(line)
-        if err != nil {
-            panic(err)
-        }
-
-    // case "done":
-        // txt, err := ioutil.ReadFile(file)
+            }
+            fmt.Println("\n")
 
 
-    default:
-        fmt.Println("Expected different subcommand than [", os.Args[1], "]")
-        // print usage
-        All()
-        os.Exit(1)
+        case "add":
+            fmt.Println("Adding:", arg[0])
+            line := "TODO:" + arg[0] + "\n"
+            _, err := file.WriteString(line)
+            if err != nil {
+                panic(err)
+            }
+
+        // TODO: Alert when task is already marked as done
+        // TODO: Use hashes to ID tasks
+        case "done":
+            fmt.Println("Marking", arg[0], "as done")
+            file, err := ioutil.ReadFile(filename)
+            if err != nil {
+                log.Fatal(err)
+            }
+            lines := strings.Split(string(file), "\n")
+
+            for i, line := range lines {
+                if strings.Contains(line, arg[0]) {
+                    fmt.Println("Replacing")
+                    strings.Replace(lines[i], "TODO", "DONE", 1)
+                }
+                fmt.Println(lines[i])
+            }
+            output := strings.Join(lines, "\n")
+            err = ioutil.WriteFile(filename, []byte(output), 0644)
+            if err != nil {
+                log.Fatal(err)
+            }
+
+        default:
+            fmt.Println("Expected different subcommand than [", os.Args[1], "]")
+            // print usage
+            All()
+            os.Exit(1)
     }
 
 }
