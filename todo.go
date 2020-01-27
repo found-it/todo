@@ -9,6 +9,9 @@ import (
     "io/ioutil"
     "github.com/fatih/color"
     "log"
+    "os/user"
+    "path/filepath"
+    "os/exec"
 )
 
 
@@ -27,20 +30,29 @@ type TodoLine struct {
 // This is the main function
 func main() {
 
-    const filename string = ".todo.txt"
+    // Get the home directory
+    usr, err := user.Current()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // TODO: Figure out how to make this const
+    var filename string = filepath.Join(usr.HomeDir, ".todo.txt")
 
     yellow := color.New(color.FgYellow, color.Bold).SprintFunc()
     blue   := color.New(color.FgBlue).SprintFunc()
 
     cmd, arg := Parse()
 
+    // TODO: Open file in each function
     file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
     if err != nil {
         log.Fatal(err)
     }
-
     defer file.Close()
 
+
+    // Operate on commands
     switch cmd {
 
         case "list":
@@ -88,6 +100,7 @@ func main() {
             if err != nil {
                 panic(err)
             }
+
 
         // TODO: Alert when task is already marked as done
         // TODO: Use hashes to ID tasks
