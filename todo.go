@@ -1,6 +1,11 @@
 //
+//
+//
+//
+//
 package main
 
+//
 import (
     "fmt"
     "os"
@@ -15,6 +20,9 @@ import (
 )
 
 
+//
+//
+//
 type TodoLine struct {
 
     Id      uint32
@@ -25,6 +33,11 @@ type TodoLine struct {
 }
 
 
+//
+//
+//
+//
+//
 func hash (s string) uint32 {
 
     h := fnv.New32a()
@@ -34,10 +47,13 @@ func hash (s string) uint32 {
 }
 
 
-// func printTodoLine(line TodoLine
 
 
+//
+//
 // Grabs lines from the text file and returns an array of structs
+//
+//
 func fillarray (filename string) []TodoLine {
 
     file, err := os.OpenFile(filename, os.O_RDONLY, 0644)
@@ -79,6 +95,13 @@ func fillarray (filename string) []TodoLine {
     return todos
 }
 
+
+
+//
+//
+//
+//
+//
 func list (tl []TodoLine) {
     fmt.Println("\n")
 
@@ -94,7 +117,13 @@ func list (tl []TodoLine) {
     fmt.Println("\n")
 }
 
+
+
+//
+//
 // This is the main function
+//
+//
 func main() {
 
     // Get the home directory
@@ -109,11 +138,6 @@ func main() {
     cmd, arg := Parse()
 
     // TODO: Open file in each function
-    file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
 
 
     // Operate on commands
@@ -125,16 +149,21 @@ func main() {
 
 
         case "add":
+            file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+            if err != nil {
+                log.Fatal(err)
+            }
+            defer file.Close()
             fmt.Println("Adding:", arg[0])
             line := fmt.Sprintf("%d:TODO:%s\n", hash(arg[0]), arg[0])
-            _, err := file.WriteString(line)
+            _, err = file.WriteString(line)
             if err != nil {
                 panic(err)
             }
 
 
         // TODO: Alert when task is already marked as done
-        // TODO: Use hashes to ID tasks
+        // TODO: Write out to the file
         case "done":
             fmt.Println("Marking", arg[0], "as done")
             ll := fillarray(filename)
@@ -144,10 +173,26 @@ func main() {
                 log.Fatal(err)
             }
             id := uint32(i64)
-            for _,l := range ll {
+            for i,l := range ll {
                 if l.Id == id {
                     fmt.Println("Marking", l.Task, "as done")
+                    ll[i].Status = "DONE"
                 }
+            }
+            file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
+            if err != nil {
+                log.Fatal(err)
+            }
+            defer file.Close()
+
+            var sb strings.Builder
+            for _,l := range ll {
+                line := fmt.Sprintf("%d:%s:%s\n", l.Id, l.Status, l.Task)
+                sb.WriteString(line)
+            }
+            _, err = file.WriteString(sb.String())
+            if err != nil {
+                log.Fatal(err)
             }
 
 
