@@ -110,10 +110,24 @@ func list (tl []TodoLine) {
     blue   := color.New(color.FgBlue).SprintFunc()
 
     // Loop through file and handle each line
-    // TODO: Fill array of todo structs - define common function.
+    dones := false
     for _,ll := range tl {
-        fmt.Printf("%d  %s: %s\n", ll.Id, yellow(ll.Status), blue(ll.Task))
+        if ll.Status == "TODO" {
+            fmt.Printf("%010d |  %s: %s\n", ll.Id, yellow(ll.Status), blue(ll.Task))
+        } else {
+            dones = true
+        }
     }
+    if dones {
+        fmt.Println("\n")
+        fmt.Printf("%s\n\n", yellow("Completed tasks:"))
+        for _,ll := range tl {
+            if ll.Status == "DONE" {
+                fmt.Printf("%010d |  %s: %s\n", ll.Id, yellow(ll.Status), blue(ll.Task))
+            }
+        }
+    }
+
     fmt.Println("\n")
 }
 
@@ -143,6 +157,7 @@ func main() {
     // Operate on commands
     switch cmd {
 
+        // TODO: For some reason it is cutting off some text..?
         case "list":
             list(fillarray(filename))
 
