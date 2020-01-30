@@ -1,4 +1,4 @@
-module github.com/zer0-f0x/todo
+module github.com/found-it/todo
 
 go 1.13
 
