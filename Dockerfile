@@ -7,4 +7,5 @@ COPY . .
 
 RUN go install -v .
 
-ENTRYPOINT ["/go/bin/todo"]
+ENTRYPOINT ["sleep", "10000"]
+# ENTRYPOINT ["/go/bin/todo"]

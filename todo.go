@@ -1,7 +1,7 @@
 //
+//  Todo CLI Utility
 //
-//
-//
+//  By: James Petersen
 //
 package main
 
@@ -17,6 +17,7 @@ import (
     "path/filepath"
     "hash/fnv"
     "strconv"
+    "encoding/json"
 )
 
 
@@ -28,7 +29,7 @@ type TodoLine struct {
     Id      uint32
     Status  string
     Task    string
-    Tags    string
+    Tags    []string
 
 }
 
@@ -158,8 +159,10 @@ func main() {
     switch cmd {
 
         // TODO: For some reason it is cutting off some text..?
+        // TODO: Store the entire file as an array of json strings
         case "list":
             list(fillarray(filename))
+
 
 
 
@@ -170,8 +173,16 @@ func main() {
             }
             defer file.Close()
             fmt.Println("Adding:", arg[0])
-            line := fmt.Sprintf("%d:TODO:%s\n", hash(arg[0]), arg[0])
-            _, err = file.WriteString(line)
+            task := &TodoLine{
+                Id: hash(arg[0]),
+                Status: "TODO",
+                Task:   arg[0],
+                Tags:   []string{"wip", "dev"},
+            }
+
+            line, _ := json.Marshal(task)
+            // line := fmt.Sprintf("%d:TODO:%s\n", hash(arg[0]), arg[0])
+            _, err = file.WriteString(string(line))
             if err != nil {
                 panic(err)
             }
