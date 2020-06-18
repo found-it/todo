@@ -1,0 +1,14 @@
+on: push
+name: deploy
+jobs:
+  build:
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Build
+        run: docker build . --file multi-juicer/juice-balancer/Dockerfile --tag localbuild/testimage:latest
+      - uses: anchore/scan-action@master
+        with:
+          image-reference: "localbuild/testimage:latest"
+          dockerfile-path: "multi-juicer/juice-balancer/Dockerfile"
+          fail-build: true
