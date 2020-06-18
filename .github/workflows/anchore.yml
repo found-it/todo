@@ -12,3 +12,4 @@ jobs:
           image-reference: "localbuild/testimage:latest"
           dockerfile-path: "Dockerfile"
           fail-build: true
+          debug: true
